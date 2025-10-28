@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welsh Museums Metrics Dashboard</title>
+    <style>
+/* Dashboard Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+.dashboard-nav {
+    background-color: #2c3e50;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-item a {
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.3s;
+}
+
+.nav-item a:hover {
+    opacity: 0.8;
+}
+
+.overview-section, .comparison-section, .section {
+    padding: 2rem;
+}
+
+.section h2 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.overview-card, .card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-value, .card-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #3498db;
+    margin: 0.5rem 0;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.table-component {
+    padding: 2rem;
+    background: white;
+    margin: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+.table-controls {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-input, .filter-select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 250px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9rem;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.chart-component {
+    padding: 2rem;
+    background: white;
+    margin: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.chart-wrapper {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 300px;
+}
+
+.chart-wrapper h3 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.chart-placeholder {
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.bar-chart, .doughnut-chart {
+    margin-top: 1rem;
+}
+
+.bar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.bar-label {
+    width: 100px;
+    font-size: 0.9rem;
+}
+
+.bar-container {
+    flex: 1;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #3498db;
+    transition: width 0.3s ease;
+}
+
+.bar-value {
+    margin-left: 0.5rem;
+    font-weight: 600;
+    min-width: 40px;
+}
+
+.comparison-container {
+    margin-top: 1.5rem;
+}
+
+.comparison-selects {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.comparison-select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 250px;
+}
+
+.comparison-result {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.comparison-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.comparison-card h4 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.museum-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 0.5rem;
+}
+
+.metric-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.metric-label {
+    color: #7f8c8d;
+}
+
+.metric-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="dashboard-nav">
+        <div class="nav-brand">Welsh Museums Metrics Dashboard</div>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#overview">Overview</a></li>
+            <li class="nav-item"><a href="#data">Data</a></li>
+            <li class="nav-item"><a href="#charts">Charts</a></li>
+            <li class="nav-item"><a href="#comparison">Comparison</a></li>
+        </ul>
+    </nav>
+
+    <!-- Overview Section -->
+    <section id="overview" class="overview-section">
+        <h2>Overview</h2>
+        <div class="overview-grid" id="overview-grid"></div>
+    </section>
+
+    <!-- Data Table Section -->
+    <section id="data" class="section">
+        <div class="table-component">
+            <h2>Museum Data</h2>
+            <div class="table-controls">
+                <input type="text" id="search-input" class="search-input" placeholder="Search museums...">
+                <select id="status-filter" class="filter-select">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <table id="data-table">
+                <thead>
+                    <tr id="table-header"></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section id="charts" class="section">
+        <h2>Visualizations</h2>
+        <div class="chart-grid">
+            <div class="chart-wrapper">
+                <h3>Digital Growth Score Distribution</h3>
+                <div id="chart1" class="bar-chart"></div>
+            </div>
+            <div class="chart-wrapper">
+                <h3>Digitisation Score Distribution</h3>
+                <div id="chart2" class="bar-chart"></div>
+            </div>
+            <div class="chart-wrapper">
+                <h3>Lighthouse Metrics Comparison</h3>
+                <div id="chart3" class="bar-chart"></div>
+            </div>
+            <div class="chart-wrapper">
+                <h3>Top Company Statuses</h3>
+                <div id="chart4" class="doughnut-chart"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section id="comparison" class="comparison-section">
+        <h2>Compare Museums</h2>
+        <div class="comparison-container">
+            <div class="comparison-selects">
+                <select id="museum1-select" class="comparison-select">
+                    <option value="">Select first museum</option>
+                </select>
+                <select id="museum2-select" class="comparison-select">
+                    <option value="">Select second museum</option>
+                </select>
+            </div>
+            <div id="comparison-result" class="comparison-result"></div>
+        </div>
+    </section>
+
+    <script>
+        // Proper CSV Parser that handles quoted fields
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = parseCSVLine(lines[0]);
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length > 0) {
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = values[index] || '';
+                    });
+                    data.push(obj);
+                }
+            }
+            
+            return data;
+        }
+        
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            return result;
+        }
+
+        // Load CSV data from file
+        fetch('data/Welsh_Museums_Metrics.csv')
+            .then(response => response.text())
+            .then(csvText => {
+                const museumsData = parseCSV(csvText);
+                let filteredData = museumsData;
+                
+                // Helper function to parse numeric values
+                function parseNumeric(value) {
+                    if (!value || value === '' || value === 'ERROR') return null;
+                    const num = parseFloat(value);
+                    return isNaN(num) ? null : num;
+                }
+
+                // Initialize Overview Section
+                function initializeOverview() {
+                    const validGrowthScores = museumsData
+                        .map(m => parseNumeric(m['digital growth score']))
+                        .filter(v => v !== null);
+                    
+                    const validDigitisationScores = museumsData
+                        .map(m => parseNumeric(m['digitisation score']))
+                        .filter(v => v !== null);
+                    
+                    const activeMuseums = museumsData.filter(m => 
+                        m['company status'] && m['company status'].toLowerCase().includes('active')
+                    ).length;
+                    
+                    const avgGrowth = validGrowthScores.length > 0
+                        ? (validGrowthScores.reduce((a, b) => a + b, 0) / validGrowthScores.length).toFixed(2)
+                        : 'N/A';
+                    
+                    const avgDigitisation = validDigitisationScores.length > 0
+                        ? (validDigitisationScores.reduce((a, b) => a + b, 0) / validDigitisationScores.length).toFixed(2)
+                        : 'N/A';
+                    
+                    const stats = [
+                        { label: 'Total Museums', value: museumsData.length },
+                        { label: 'Active Companies', value: activeMuseums },
+                        { label: 'Avg Digital Growth Score', value: avgGrowth },
+                        { label: 'Avg Digitisation Score', value: avgDigitisation }
+                    ];
+                    
+                    const grid = document.getElementById('overview-grid');
+                    grid.innerHTML = '';
+                    
+                    stats.forEach(stat => {
+                        const card = document.createElement('div');
+                        card.className = 'overview-card';
+                        card.innerHTML = `
+                            <div class="stat-label">${stat.label}</div>
+                            <div class="stat-value">${stat.value}</div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
+
+                // Initialize Data Table
+                function initializeTable() {
+                    const columns = ['name', 'url', 'company status', 'digital growth score', 'digitisation score', 'lighthouse accessibility'];
+                    const header = document.getElementById('table-header');
+                    
+                    header.innerHTML = '';
+                    columns.forEach(col => {
+                        const th = document.createElement('th');
+                        th.textContent = col.charAt(0).toUpperCase() + col.slice(1);
+                        header.appendChild(th);
+                    });
+                    
+                    renderTableRows(filteredData, columns);
+                    
+                    // Setup filters
+                    const statuses = [...new Set(museumsData.map(m => m['company status']).filter(s => s))];
+                    const statusFilter = document.getElementById('status-filter');
+                    statuses.slice(0, 10).forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status;
+                        option.textContent = status;
+                        statusFilter.appendChild(option);
+                    });
+                    
+                    // Search functionality
+                    document.getElementById('search-input').addEventListener('input', filterTable);
+                    document.getElementById('status-filter').addEventListener('change', filterTable);
+                }
+                
+                function renderTableRows(data, columns) {
+                    const body = document.getElementById('table-body');
+                    body.innerHTML = '';
+                    
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        columns.forEach(col => {
+                            const td = document.createElement('td');
+                            let value = row[col] || '';
+                            if (col === 'url' && value && value !== 'NO WEBSITE' && value.startsWith('http')) {
+                                td.innerHTML = `<a href="${value}" target="_blank" style="color: #3498db;">Visit</a>`;
+                            } else {
+                                td.textContent = value;
+                            }
+                            tr.appendChild(td);
+                        });
+                        body.appendChild(tr);
+                    });
+                }
+                
+                function filterTable() {
+                    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+                    const statusFilter = document.getElementById('status-filter').value;
+                    
+                    filteredData = museumsData.filter(museum => {
+                        const matchesSearch = museum.name.toLowerCase().includes(searchTerm);
+                        const matchesStatus = !statusFilter || museum['company status'] === statusFilter;
+                        return matchesSearch && matchesStatus;
+                    });
+                    
+                    const columns = ['name', 'url', 'company status', 'digital growth score', 'digitisation score', 'lighthouse accessibility'];
+                    renderTableRows(filteredData, columns);
+                }
+
+                // Initialize Charts with custom bar charts
+                function initializeCharts() {
+                    // Chart 1: Digital Growth Score Distribution
+                    const growthScores = museumsData
+                        .map(m => parseNumeric(m['digital growth score']))
+                        .filter(v => v !== null && v < 500);
+                    
+                    const growthRanges = ['0-50', '50-100', '100-200', '200-300', '300+'];
+                    const growthCounts = [
+                        growthScores.filter(s => s >= 0 && s < 50).length,
+                        growthScores.filter(s => s >= 50 && s < 100).length,
+                        growthScores.filter(s => s >= 100 && s < 200).length,
+                        growthScores.filter(s => s >= 200 && s < 300).length,
+                        growthScores.filter(s => s >= 300).length
+                    ];
+                    
+                    createBarChart('chart1', growthRanges, growthCounts, Math.max(...growthCounts));
+                    
+                    // Chart 2: Digitisation Score Distribution
+                    const digitisationScores = museumsData
+                        .map(m => parseNumeric(m['digitisation score']))
+                        .filter(v => v !== null);
+                    
+                    const digitRanges = ['0-20', '20-40', '40-60', '60-80'];
+                    const digitCounts = [
+                        digitisationScores.filter(s => s >= 0 && s < 20).length,
+                        digitisationScores.filter(s => s >= 20 && s < 40).length,
+                        digitisationScores.filter(s => s >= 40 && s < 60).length,
+                        digitisationScores.filter(s => s >= 60 && s < 80).length
+                    ];
+                    
+                    createBarChart('chart2', digitRanges, digitCounts, Math.max(...digitCounts), '#e74c3c');
+                    
+                    // Chart 3: Lighthouse Metrics
+                    const lighthouseData = museumsData.filter(m => 
+                        parseNumeric(m['lighthouse accessibility']) !== null &&
+                        parseNumeric(m['lighthouse performance']) !== null &&
+                        parseNumeric(m['lighthouse seo']) !== null
+                    );
+                    
+                    const avgAccessibility = lighthouseData.reduce((sum, m) => 
+                        sum + parseNumeric(m['lighthouse accessibility']), 0) / lighthouseData.length;
+                    const avgPerformance = lighthouseData.reduce((sum, m) => 
+                        sum + parseNumeric(m['lighthouse performance']), 0) / lighthouseData.length;
+                    const avgSEO = lighthouseData.reduce((sum, m) => 
+                        sum + parseNumeric(m['lighthouse seo']), 0) / lighthouseData.length;
+                    
+                    createBarChart('chart3', 
+                        ['Accessibility', 'Performance', 'SEO'],
+                        [avgAccessibility.toFixed(2), avgPerformance.toFixed(2), avgSEO.toFixed(2)],
+                        1,
+                        '#2ecc71'
+                    );
+                    
+                    // Chart 4: Company Status Distribution
+                    const statusCounts = {};
+                    museumsData.forEach(m => {
+                        const status = m['company status'] || 'Unknown';
+                        if (status) {
+                            statusCounts[status] = (statusCounts[status] || 0) + 1;
+                        }
+                    });
+                    
+                    const topStatuses = Object.entries(statusCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+                    
+                    const chart4 = document.getElementById('chart4');
+                    chart4.innerHTML = '';
+                    topStatuses.forEach(([status, count]) => {
+                        const item = document.createElement('div');
+                        item.style.marginBottom = '0.5rem';
+                        item.innerHTML = `
+                            <strong>${status}</strong>: ${count} museums
+                        `;
+                        chart4.appendChild(item);
+                    });
+                }
+                
+                function createBarChart(containerId, labels, data, maxValue, color = '#3498db') {
+                    const container = document.getElementById(containerId);
+                    container.innerHTML = '';
+                    
+                    labels.forEach((label, index) => {
+                        const value = data[index];
+                        const percentage = (value / maxValue) * 100;
+                        
+                        const bar = document.createElement('div');
+                        bar.className = 'bar';
+                        bar.innerHTML = `
+                            <div class="bar-label">${label}</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="width: ${percentage}%; background-color: ${color};"></div>
+                            </div>
+                            <div class="bar-value">${value}</div>
+                        `;
+                        container.appendChild(bar);
+                    });
+                }
+
+                // Initialize Comparison Section
+                function initializeComparison() {
+                    const select1 = document.getElementById('museum1-select');
+                    const select2 = document.getElementById('museum2-select');
+                    
+                    museumsData.forEach((museum, index) => {
+                        const option1 = document.createElement('option');
+                        option1.value = index;
+                        option1.textContent = museum.name;
+                        select1.appendChild(option1);
+                        
+                        const option2 = document.createElement('option');
+                        option2.value = index;
+                        option2.textContent = museum.name;
+                        select2.appendChild(option2);
+                    });
+                    
+                    select1.addEventListener('change', updateComparison);
+                    select2.addEventListener('change', updateComparison);
+                }
+                
+                function updateComparison() {
+                    const index1 = document.getElementById('museum1-select').value;
+                    const index2 = document.getElementById('museum2-select').value;
+                    const result = document.getElementById('comparison-result');
+                    
+                    if (!index1 || !index2) {
+                        result.innerHTML = '<p>Please select two museums to compare</p>';
+                        return;
+                    }
+                    
+                    const museum1 = museumsData[index1];
+                    const museum2 = museumsData[index2];
+                    
+                    const metrics = [
+                        { label: 'Digital Growth Score', key: 'digital growth score' },
+                        { label: 'Digitisation Score', key: 'digitisation score' },
+                        { label: 'Reading Ease', key: 'reading ease' },
+                        { label: 'Internal Links', key: 'internal links' },
+                        { label: 'Lighthouse Accessibility', key: 'lighthouse accessibility' },
+                        { label: 'Lighthouse Performance', key: 'lighthouse performance' }
+                    ];
+                    
+                    result.innerHTML = `
+                        <div class="comparison-card">
+                            <h4>Museum 1</h4>
+                            <div class="museum-name">${museum1.name}</div>
+                            ${metrics.map(m => `
+                                <div class="metric-row">
+                                    <span class="metric-label">${m.label}:</span>
+                                    <span class="metric-value">${museum1[m.key] || 'N/A'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="comparison-card">
+                            <h4>Museum 2</h4>
+                            <div class="museum-name">${museum2.name}</div>
+                            ${metrics.map(m => `
+                                <div class="metric-row">
+                                    <span class="metric-label">${m.label}:</span>
+                                    <span class="metric-value">${museum2[m.key] || 'N/A'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                // Initialize dashboard on page load
+                initializeOverview();
+                initializeTable();
+                initializeCharts();
+                initializeComparison();
+            })
+            .catch(error => {
+                console.error('Error loading CSV:', error);
+                document.body.innerHTML += '<div style="padding: 2rem; color: red;">Error loading data. Please ensure the CSV file is accessible.</div>';
+            });
+    </script>
+</body>
+</html>
